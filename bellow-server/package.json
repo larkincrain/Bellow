@@ -1,0 +1,16 @@
+{
+  "name": "Bellow",
+  "version": "0.0.1",
+  "description": "Private location reviews for your organization",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "3.5.0",
+    "mongoose": "3.8.8",
+    "async": "0.2.10"
+  },
+  "author": "Larkin Crain",
+  "license": ""
+}
