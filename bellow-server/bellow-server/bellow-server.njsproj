@@ -31,6 +31,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="environment.js" />
+    <Compile Include="schemas.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
   </ItemGroup>
