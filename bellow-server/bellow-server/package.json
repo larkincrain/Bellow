@@ -8,13 +8,13 @@
     "email": "larkin.ideely@gmail.com"
   },
   "dependencies": {
-        "express": "4.x",
-        "body-parser": "~1.0.0",
-        "morgan": "latest",
-        "mongoose": "3.8.8",
-        "jsonwebtoken": "0.4.0"
-    },
-    "engines": {
-        "node": ">=0.10.0"
-    }
+    "body-parser": "^1.0.2",
+    "express": "^4.13.3",
+    "jsonwebtoken": "^0.4.0",
+    "mongoose": "^3.8.8",
+    "morgan": "^1.6.1"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
 }

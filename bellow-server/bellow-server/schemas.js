@@ -1,6 +1,17 @@
-﻿//Let's get some schemas defined
-var ObjectId = mongoose.Schema.Types.ObjectId; //Needed so we can use type ObjectId in our schema declarations
+﻿var mongoose = require("mongoose");                         //Accessing our mongo database 
 
+//Let's get some schemas defined
+var ObjectId = mongoose.Schema.Types.ObjectId; //Needed so we can use type ObjectId in our schema declarations
+var Schema = mongoose.Schema;
+
+// set up a mongoose model and pass it using module.exports
+module.exports = mongoose.model('User', new Schema({
+    name: String, 
+    password: String, 
+    admin: Boolean
+}));
+
+/*
 //The definition of a comment. Comments can be left on reviews or other comments
 var commentSchema = mongoose.Schema({
     author: String,						//The name of the commentator
@@ -14,9 +25,11 @@ var commentSchema = mongoose.Schema({
     
     positive: Number,					//The amount of positive feedback
     negative: Number,					//The amount of negative feedback
+    
     attachments: [{
             attachment_id: ObjectId			//An array of associated media Ids, such as pictures, videos etc
-        }],					
+        }],
+    					
 });
 
 //The definition of a review. Reviews are left against establishments or against events
@@ -218,3 +231,5 @@ modules.exports.commentSchema = comments;
 modules.exports.reviewSchema = reviews;
 modules.exports.eventsSchema = events;
 modules.exports.specialsSchema = specials;
+ * 
+ * */

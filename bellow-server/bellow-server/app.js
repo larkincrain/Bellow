@@ -13,7 +13,7 @@
  * Author: Larkin
  * Date: August 27th, 2015
  * Description: Attempting to get authentication with a MongoDB in place using
- * this tutorial: http://code.tutsplus.com/tutorials/token-based-authentication-with-angularjs-nodejs--cms-22543
+ * this tutorial: https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
  * 
  * */
 
@@ -29,11 +29,11 @@ var schemas = require('./schemas.js');                      //Our schemas for th
 var environment = require('./environment.js');              //The environment variables, such as connection strings
 
 var app = express();
-var port = environment.port || 3001;
+var port = environment.port || 8080;
+console.log('The application is using port number: ' + port);
 
 // Connect to DB
 mongoose.connect(environment.mongo_connection_string);
-
 
 //Set up our application
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -46,8 +46,18 @@ app.use(function (req, res, next) {
     next();
 });
 
+//Basic routes
+app.get('/', function (req, res) {
+    console.log('Accessing home directory');
+    res.send('The API will be at: http://localhost:' + port + '/API');
+});
 
+//Basic routes
+app.get('/api', function (req, res) {
+    console.log('Welcome to the API');
+    res.send('Welcome to the API');
+});
 
-
-
-
+//Start the server
+app.listen(port);
+console.log('Magic happens at http://localhost:' + port);
