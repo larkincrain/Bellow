@@ -64,13 +64,13 @@ Configuration file for the Bellow App
 
         }]);
 
-    var dataPaths = {
-        dataUrl: "",												//This needs to be the location of my node server
-        test_dataUrl: "",											//This needs to be the location of my node server test end point
+    var apiPaths = {
+        apiUrl: "",												    //This needs to be the location of my node server
+        test_apiUrl: "",											//This needs to be the location of my node server test end point
     };
 
     var config = {
-        dataPaths: dataPaths,
+        apiPaths: apiPaths,
         version: '0.0.1'
     };
 
