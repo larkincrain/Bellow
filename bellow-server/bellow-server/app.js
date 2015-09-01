@@ -83,6 +83,9 @@ app.get('/setup', function (req, res) {
 //API Routes
 var apiRoutes = express.Router();
 
+apiRoutes.post('/signup', function (req, res) {
+
+});
 
 //Route to authenticate a user
 apiRoutes.post('/authenticate', function (req, res) {
