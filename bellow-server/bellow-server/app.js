@@ -85,6 +85,16 @@ var apiRoutes = express.Router();
 
 apiRoutes.post('/signup', function (req, res) {
 
+    var hashed_password = req.body.password;
+    
+
+    //Create a user object with the properties passed in
+    var user = new User({
+        name: req.body.name,
+        password: 'testpassword',
+        admin: true
+    });
+
 });
 
 //Route to authenticate a user
