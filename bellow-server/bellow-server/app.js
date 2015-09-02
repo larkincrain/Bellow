@@ -27,7 +27,7 @@ var passport = require('passport');                         //Different methods 
 var flash = require('connect-flash');                       //Sending flash messages
 var cookieParser = require('cookie-parser');                //For using cookies
 var session = require('express-session');                   //Storing session information
-var bcrypt = require('bcrypt-nodejs');                      //Used for cryptograhic functions such as hasing passwords                      
+var bcrypt = require('bcrypt');                             //Used for cryptograhic functions such as hasing passwords                      
 var q = require('q');                                       //Used for promises and the like
 
 //Modules defined in this application
