@@ -8,6 +8,7 @@
     "email": "larkin.ideely@gmail.com"
   },
   "dependencies": {
+    "bcrypt": "0.8.5",
     "body-parser": "^1.0.2",
     "express": "^4.13.3",
     "jsonwebtoken": "^0.4.0",

@@ -14,7 +14,7 @@ var q = require('q');                                       //Used for promises
 module.exports.hash_password = function (password) {
     
     var salt;                                               //Information to append onto our password when hashing
-    var rounds = 100;                                       //The number of rounds to compute the salt
+    var rounds = 10;                                        //The number of rounds to compute the salt
     var deferred = q.defer();                               //Create a deferred object
     
     function generateHash(err, salt){
@@ -25,8 +25,22 @@ module.exports.hash_password = function (password) {
         else{
 
             console.log('Salt is: ' + salt);
+            console.log('password is: ' + password);
 
-            bcrypt.hash(password, salt, null, finished_hashing); 
+            //bcrypt.hash(password, salt, finished_hashing); 
+            bcrypt.hash(password, salt, function (error, hashed) {
+                
+                console.log('after the hash function');
+
+                //Check if there was an error and if there was, return it
+                if (error) {
+                    console.log('err in hash generation: ' + error);
+                    deferred.reject(error);
+                } else {
+                    console.log('resolve that promise');
+                    deferred.resolve(hashed);
+                }
+            });
         }
     };                  //This function will generate the has from the password and the salt
 
