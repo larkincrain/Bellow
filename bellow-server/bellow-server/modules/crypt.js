@@ -6,7 +6,7 @@
  *  
  * */
 
-var bcrypt = require('bcrypt-nodejs');                      //Used for cryptograhic functions such as hasing passwords
+var bcrypt = require('bcrypt');                      //Used for cryptograhic functions such as hasing passwords
 var q = require('q');                                       //Used for promises
 
 //This function will take a user's password and will hash it, returning the hashed value to be saved into
