@@ -27,10 +27,13 @@ var passport = require('passport');                         //Different methods 
 var flash = require('connect-flash');                       //Sending flash messages
 var cookieParser = require('cookie-parser');                //For using cookies
 var session = require('express-session');                   //Storing session information
+var bcrypt = require('bcrypt-nodejs');                      //Used for cryptograhic functions such as hasing passwords                      
+var q = require('q');                                       //Used for promises and the like
 
 //Modules defined in this application
-var User = require('./schemas/user.js');                //Our schemas for the database
+var User = require('./schemas/user.js');                    //Our schemas for the database
 var environment = require('./environment.js');              //The environment variables, such as connection strings
+var crypt = require('./modules/crypt.js');                  //Our module for hashing passwords and comparing passwords
 
 var app = express();
 var port = environment.port || 8080;
@@ -84,25 +87,62 @@ app.get('/setup', function (req, res) {
 var apiRoutes = express.Router();
 
 apiRoutes.post('/signup', function (req, res) {
-
-    var hashed_password = req.body.password;
     
+    var password = req.body.password;                       //The password the user submitted
+    var email = req.body.email;                             //The email address the user used to sign up
+    
+    function register_user(hashed_password){
+        
+        console.log('In register user function: ' + hashed_password);
+        
+        //Create a user object with the properties passed in
+        var user = new User({
+            email: email,
+            password: hashed_password
+        });
+            
+        //Save the sample user to our database
+        user.save(function (err) {
+            if (err)
+                throw err;
+                
+            else {
+                //if we completed the transaction without an error:
+                console.log('User saved Successfully!');
+                res.json({ success: true });
+            }
+        });   
+    };      //Instantiates a new user in the database with the user's email and hashed password
 
-    //Create a user object with the properties passed in
-    var user = new User({
-        name: req.body.name,
-        password: 'testpassword',
-        admin: true
-    });
+    //Need to check to ensure that the email address isn't already signed up
+    User.findOne({
+        email: email
+    }, function (err, user) {
+        if (err)
+            throw err;
+
+        else
+            if (user) {
+                //then the email address has already been registered, don't continue
+                res.json({ success: false, message: 'Registration failed. Email address already registered.' })
+            } else {
+                //then the email address hasn't been registered, so we can proceed
+                console.log('about to register the user');
+                crypt.hash_password(password).then(register_user);    //Get the hashed password
+            }
+    }); 
 
 });
 
 //Route to authenticate a user
 apiRoutes.post('/authenticate', function (req, res) {
     
+    var password = req.body.password;
+    var email = req.body.email;
+
     //Find the user
     User.findOne({
-        name: req.body.name
+        email: email
     }, function (err, user) {
         
         //Check to see if we threw an error
@@ -115,25 +155,30 @@ apiRoutes.post('/authenticate', function (req, res) {
         } else if (user) {
             
             //Check to see if the password matches
-            if (user.password != req.body.password) {
-                res.json({ success: false, message: 'Authentication failed. Wrong password' })
-            } else {
-                
-                //The user is found and the password, so we need to create a password
-                var token = jwt.sign(user, 'superSecret', {
-                    expiresInMinutes: 1440      //24 hours
-                });
-                
-                res.json({
-                    success: true,
-                    message: 'Enjoy your token!',
-                    token: token
-                });
-            }
+            crypt.compare_to_hash(password, user.password).then(function (res) {
+                console.log('In authentication function, after checking, here is the result: ' + res);
+
+                if (!res) {
+                    res.json({ success: false, message: 'Authentication failed. Wrong password' })
+                } else {
+                    
+                    console.log('no errors!');
+                      
+                    //The user is found and the password, so we need to create a jsonwebtoken
+                    var token = jwt.sign(user, environment.secret, {
+                        expiresInMinutes: environment.token_life
+                    });
+                    
+                    res.json({
+                        success: true,
+                        message: 'Enjoy your token!',
+                        token: token
+                    });
+                }
+            });
         }
     });
 });
-
 
 //Define the middleware here that will protect the routes beneath this function. This will ensure that a token 
 //is provided to access these functions

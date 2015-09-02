@@ -1,4 +1,13 @@
-﻿var mongoose = require("mongoose");                         //Accessing our mongo database 
+﻿/*
+ * Author: Larkin
+ * Date: September 2nd, 2015
+ * Description: This file defines the data module for users in our application.
+ *  
+ * */
+
+
+
+var mongoose = require("mongoose");                         //Accessing our mongo database 
 
 //Let's get some schemas defined
 var ObjectId = mongoose.Schema.Types.ObjectId; //Needed so we can use type ObjectId in our schema declarations
@@ -21,6 +30,7 @@ module.exports = mongoose.model('User', new Schema({
     date_of_birth: Date,						//When the user was born
     gender: String,								//Male or female
     email: String,								//The email address associated with the user
+    password: String,                           //The hashed version of the user's password
     groups: [{
         group_name: String,						//Group name that the user belongs to
         group_id: ObjectId						//Group Id that the user belongs to
