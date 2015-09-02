@@ -81,7 +81,10 @@ app.get('/setup', function (req, res) {
     });
 });
 
-
+//Just messing with Hailey
+app.get('/messing', function (req, res) {
+    res.send('Hailey Shoemanufacturer is a lil batch and all she do is listen ta trap music all day.');
+});
 
 //API Routes
 var apiRoutes = express.Router();
@@ -139,12 +142,32 @@ apiRoutes.post('/authenticate', function (req, res) {
     
     var password = req.body.password;
     var email = req.body.email;
+    var user_object;
 
-    //Find the user
-    User.findOne({
-        email: email
-    }, function (err, user) {
+    function send_token(result){
+        console.log('In authentication function, after checking, here is the result: ' + result);
         
+        if (!result) {
+            res.json({ success: false, message: 'Authentication failed. Wrong password' })
+        } else {
+            
+            console.log('no errors!');
+            
+            //The user is found and the password, so we need to create a jsonwebtoken
+            var token = jwt.sign(user_object, 'followyourfolly', {
+                expiresInMinutes: 1440
+            });
+            
+            console.log('about to send response~!: ' + token);
+            
+            res.json({
+                success: true,
+                token: token
+            });
+        }
+    };
+    function check_password(err, user){
+         
         //Check to see if we threw an error
         if (err)
             throw err;
@@ -154,30 +177,18 @@ apiRoutes.post('/authenticate', function (req, res) {
             res.json({ success: false, message: 'Authentication failed. User not found.' })
         } else if (user) {
             
+            user_object = user;
+                
             //Check to see if the password matches
-            crypt.compare_to_hash(password, user.password).then(function (res) {
-                console.log('In authentication function, after checking, here is the result: ' + res);
-
-                if (!res) {
-                    res.json({ success: false, message: 'Authentication failed. Wrong password' })
-                } else {
-                    
-                    console.log('no errors!');
-                      
-                    //The user is found and the password, so we need to create a jsonwebtoken
-                    var token = jwt.sign(user, environment.secret, {
-                        expiresInMinutes: environment.token_life
-                    });
-                    
-                    res.json({
-                        success: true,
-                        message: 'Enjoy your token!',
-                        token: token
-                    });
-                }
-            });
+            crypt.compare_to_hash(password, user.password).then(send_token);
+           
         }
-    });
+    }
+
+    //Find the user
+    User.findOne({
+        email: email
+    }, check_password);
 });
 
 //Define the middleware here that will protect the routes beneath this function. This will ensure that a token 
