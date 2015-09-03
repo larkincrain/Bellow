@@ -246,15 +246,21 @@ apiRoutes.post('/user/edit', function (req, res) {
     //that were altered, we will have to loop through each element in the request body, find the key name, and see
     //if it matches a parameter in the user schema (to be safe) and then update that property with the passed in value.
     var email = req.body.email;
-    
-    function gotUser(user){
+    console.log('Email address of: ' + email);
+
+    function gotUser(err, user){
+        console.log('User is: ' + user);
+
         if (!user) {
             res.json({ success: false, message: 'Email address not found.' });
         } else {
+            console.log(UserSchema);
+
             _.forEach(req.body, function (n, key) {
                 if (UserSchema.path(key)) {
                     //Then we can save the request body parameter to the user's profile
-                    user.key = n;
+                    user.set(key, n);
+                    //user.path[key] = n;
                     console.log('We have this property: ' + key);
                 }
                 else
@@ -265,7 +271,6 @@ apiRoutes.post('/user/edit', function (req, res) {
             user.save(function (err, user) { });
         }
     }
-    
 
     //Check to see if we have the user in the database
     User.findOne({
