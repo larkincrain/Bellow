@@ -29,11 +29,15 @@ var cookieParser = require('cookie-parser');                //For using cookies
 var session = require('express-session');                   //Storing session information
 var bcrypt = require('bcrypt');                             //Used for cryptograhic functions such as hasing passwords                      
 var q = require('q');                                       //Used for promises and the like
+var _ = require('lodash');                                  //Used for easy manipulation of collections
 
 //Modules defined in this application
-var User = require('./schemas/user.js');                    //Our schemas for the database
+var UserModule = require('./schemas/user.js');                    //Our schemas for the database
 var environment = require('./environment.js');              //The environment variables, such as connection strings
 var crypt = require('./modules/crypt.js');                  //Our module for hashing passwords and comparing passwords
+
+var User = UserModule.User;                                 //The Mongo data model for a user
+var UserSchema = UserModule.UserSchema;                     //The Mongo schema for a user
 
 var app = express();
 var port = environment.port || 8080;
@@ -202,7 +206,7 @@ apiRoutes.use(function (req, res, next) {
     if (token) {
         
         //Verifies secret and checks
-        jwt.verify(token, 'superSecret', function (err, decoded) {
+        jwt.verify(token, 'followyourfolly', function (err, decoded) {
             if (err) {
                 return res.json({ success: false, message: 'Failed to authenticate.' });
             } else {
@@ -232,6 +236,41 @@ apiRoutes.get('/users', function (req, res) {
     User.find({}, function (err, users) {
         res.json(users);
     });
+});
+
+//Route to edit a profile, the profile information will be passed in the body of the POST, including which profile
+//is going to be edited. In this method, we will pass certain keys that can be used to update the user's profile.
+//The only required parameter is the one to identify the user, which is the email address
+apiRoutes.post('/user/edit', function (req, res) {
+    //Since we don't require that the application submits all of the properties of a user's profile, only the ones
+    //that were altered, we will have to loop through each element in the request body, find the key name, and see
+    //if it matches a parameter in the user schema (to be safe) and then update that property with the passed in value.
+    var email = req.body.email;
+    
+    function gotUser(user){
+        if (!user) {
+            res.json({ success: false, message: 'Email address not found.' });
+        } else {
+            _.forEach(req.body, function (n, key) {
+                if (UserSchema.path(key)) {
+                    //Then we can save the request body parameter to the user's profile
+                    user.key = n;
+                    console.log('We have this property: ' + key);
+                }
+                else
+                    console.log('We dont have this property: ' + key);
+            });
+
+            //After updating the user's document with the changes, we need to save the changes
+            user.save(function (err, user) { });
+        }
+    }
+    
+
+    //Check to see if we have the user in the database
+    User.findOne({
+        email: email 
+    }, gotUser);
 });
 
 //Appy the routes to our application with the prefix /api

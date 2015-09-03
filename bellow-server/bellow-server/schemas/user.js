@@ -20,36 +20,39 @@ module.exports = mongoose.model('User', new Schema({
     admin: Boolean
 }));
 */
-module.exports = mongoose.model('User', new Schema({
+var userSchema = new Schema({
     name: {
         first: String,							//First name of the user
         middle: String,							//Middle name of the user
         last: String,							//Last name of the user
-        },
+    },
     user_id: String,							//The unique identifier of the user
     date_of_birth: Date,						//When the user was born
     gender: String,								//Male or female
     email: String,								//The email address associated with the user
     password: String,                           //The hashed version of the user's password
     groups: [{
-        group_name: String,						//Group name that the user belongs to
-        group_id: ObjectId						//Group Id that the user belongs to
-    }],
-    friends: [{
-        confirmed: [{
-            friend_name: String,				//Name of the friend
-            friend_id: ObjectId					//User Id of the friend
+            group_name: String,						//Group name that the user belongs to
+            group_id: ObjectId						//Group Id that the user belongs to
         }],
-        pending_requests: [{
-            request: {
-                user_name: String,				//Name of the other user
-                user_id: ObjectId,				//Id of the other user
-                date: Date,						//Date that the request was created
-                request_type: String,			//If the user sent or received this request
-            }
+    friends: [{
+            confirmed: [{
+                    friend_name: String,				//Name of the friend
+                    friend_id: ObjectId					//User Id of the friend
+                }],
+            pending_requests: [{
+                    request: {
+                        user_name: String,				//Name of the other user
+                        user_id: ObjectId,				//Id of the other user
+                        date: Date,						//Date that the request was created
+                        request_type: String,			//If the user sent or received this request
+                    }
+                }]
         }]
-    }]
-}));
+});
+
+module.exports.User = mongoose.model('User', userSchema);
+module.exports.UserSchema = userSchema;
 
 /*
 var userSchema = mongoose.Schema({
