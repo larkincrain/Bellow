@@ -18,26 +18,49 @@
  * */
 
 // Required Modules
-var express = require("express");                           //For our web API
-var morgan = require("morgan");                             //HTTP request logger
-var bodyParser = require("body-parser");                    //To handle POST requests 
-var jwt = require("jsonwebtoken");                          //JSON web tokens, used for authentication
-var mongoose = require("mongoose");                         //Accessing our mongo database 
-var passport = require('passport');                         //Different methods of authentication
-var flash = require('connect-flash');                       //Sending flash messages
-var cookieParser = require('cookie-parser');                //For using cookies
-var session = require('express-session');                   //Storing session information
-var bcrypt = require('bcrypt');                             //Used for cryptograhic functions such as hasing passwords                      
-var q = require('q');                                       //Used for promises and the like
-var _ = require('lodash');                                  //Used for easy manipulation of collections
+var express = require("express");                                   //For our web API
+var morgan = require("morgan");                                     //HTTP request logger
+var bodyParser = require("body-parser");                            //To handle POST requests 
+var jwt = require("jsonwebtoken");                                  //JSON web tokens, used for authentication
+var mongoose = require("mongoose");                                 //Accessing our mongo database 
+var passport = require('passport');                                 //Different methods of authentication
+var flash = require('connect-flash');                               //Sending flash messages
+var cookieParser = require('cookie-parser');                        //For using cookies
+var session = require('express-session');                           //Storing session information
+var bcrypt = require('bcrypt');                                     //Used for cryptograhic functions such as hasing passwords                      
+var q = require('q');                                               //Used for promises and the like
+var _ = require('lodash');                                          //Used for easy manipulation of collections
 
 //Modules defined in this application
-var UserModule = require('./schemas/user.js');                    //Our schemas for the database
-var environment = require('./environment.js');              //The environment variables, such as connection strings
-var crypt = require('./modules/crypt.js');                  //Our module for hashing passwords and comparing passwords
+var environment = require('./environment.js');                      //The environment variables, such as connection strings
+var crypt = require('./modules/crypt.js');                          //Our module for hashing passwords and comparing passwords
 
-var User = UserModule.User;                                 //The Mongo data model for a user
-var UserSchema = UserModule.UserSchema;                     //The Mongo schema for a user
+//Our data models and schemas
+var UserModule = require('./schemas/user.js');                      //Our schemas for users
+var SpecialModule = require('./schemas/special.js');                //Our schema for specials
+var CommentModule = require('./schemas/comment.js');                //Our schema for comments on reviews
+var ReviewModule = require('./schemas/review.js');                  //Our schema for reviews on establishments of events
+var EventModule = require('./schemas/event.js');                    //Our schema for events that are held at places
+var PlaceModule = require('./schemas/place.js');                    //Our schema for places, physical establishments               
+
+//Obejcts and instantiantions of our models
+var User = UserModule.User;                                         //The Mongo data model for a user
+var UserSchema = UserModule.UserSchema;                             //The Mongo schema for a user
+
+var Special = SpecialModule.Special;                                //The Mongo data model for a special
+var SpecialSchema = SpecialModule.SpecialSchema;                    //The Mongo schema for a special
+
+var Comment = CommentModule.Comment;                                //The Mongo data model for a comment.
+var CommentSchema = CommentModule.CommentSchema;                    //The Mongo schema for a comment.
+
+var Review = ReviewModule.Review;                                   //The Mongo data model for a review
+var ReviewSchema = ReviewModule.ReviewSchema;                       //The Mongo schema for a review
+
+var Event = EventModule.Event;                                      //The Mongo data model for an event
+var EventSchema = EventModule.EventSchema;                          //The Mongo schema for a review
+
+var Place = PlaceModule.Place;                                      //The Mongo data model for a place
+var PlaceSchema = PlaceModule.PlaceSchema;                          //The Mongo schema for a place
 
 var app = express();
 var port = environment.port || 8080;
@@ -195,6 +218,7 @@ apiRoutes.post('/authenticate', function (req, res) {
     }, check_password);
 });
 
+//---- Every function defined after this function will require a token, otherwise the call will fail. --------------
 //Define the middleware here that will protect the routes beneath this function. This will ensure that a token 
 //is provided to access these functions
 apiRoutes.use(function (req, res, next) {
@@ -226,12 +250,9 @@ apiRoutes.use(function (req, res, next) {
     }
 });
 
-//route to show a random message
-apiRoutes.get('/', function (req, res) {
-    res.json({ message: 'Welcome to the bellow api' });
-});
+//Region: Users
 
-//Route to return all the users (GET /api/users)
+//Route to return all the users (GET /api/users
 apiRoutes.get('/users', function (req, res) {
     User.find({}, function (err, users) {
         res.json(users);
@@ -278,6 +299,41 @@ apiRoutes.post('/user/edit', function (req, res) {
     User.findOne({
         email: email 
     }, gotUser);
+});
+
+//Region: places
+
+//Route to get all of the places. Not practical for production, but if the user passes in a point and a radius,
+//then the function will return all the places within that area. The user can also pass in a type of place to
+//search for.
+apiRoutes.get('/places', function (req, res) {
+    
+    //See if the user passed in any geolocation parameters in the query string
+    var latitude = req.query.lat;
+    var longitude = req.query.lon;
+    var maxDistance = req.query.distance;
+    var type = req.query.type;
+    
+    if (latitude && longitude && maxDistance) {
+        
+        console.log("Distance: " + maxDistance);
+        console.log("Latitude: " + latitude);
+        console.log("Longitude: " + longitude);
+
+        Place.find({
+            geoLocation:
+            {
+                $near: [latitude, longitude],
+                $maxDistance: maxDistance
+            }
+        }, function (err, places) {
+            if (err) {
+                throw err;
+            } else {
+                res.json(places);
+            }
+        });
+    }
 });
 
 //Appy the routes to our application with the prefix /api
