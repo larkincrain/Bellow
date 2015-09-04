@@ -39,7 +39,7 @@ var placeSchema = new Schema({
         }],
     geoLocation: {
         type: [], 			                                //Longitude then latitude
-        index: ['2dsphere'],				                    //Create a geospatial index
+        index: ['2dsphere'],				                //Create a geospatial index
     },
     place_address: {
         country: String,				                    //Which country the place is located

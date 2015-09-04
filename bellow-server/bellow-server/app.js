@@ -336,6 +336,25 @@ apiRoutes.get('/places', function (req, res) {
     }
 });
 
+//Route to add a new place to the places table. We will need to provide a few pieces of information that are
+//required, but apart from those elements, the rest are optional.
+//Required:
+//Name, geoLocation, types
+apiRoutes.post('/places/add', function (req, res) {
+    var place = new Place({
+        name: name,
+        geoLocation: [lat, lon],
+        type: [types]
+    });
+
+    place.save(function (err){
+        if (err)
+            throw err;
+ 
+        res.json({ success: true });
+    })
+});
+
 //Appy the routes to our application with the prefix /api
 app.use('/api', apiRoutes);
 
