@@ -34,6 +34,11 @@
     <Compile Include="environment.js" />
     <Compile Include="modules\crypt.js" />
     <Compile Include="schemas.js" />
+    <Compile Include="schemas\comment.js" />
+    <Compile Include="schemas\event.js" />
+    <Compile Include="schemas\place.js" />
+    <Compile Include="schemas\review.js" />
+    <Compile Include="schemas\special.js" />
     <Compile Include="schemas\user.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
