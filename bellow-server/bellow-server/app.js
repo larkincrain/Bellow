@@ -268,7 +268,9 @@ apiRoutes.post('/user/edit', function (req, res) {
             });
 
             //After updating the user's document with the changes, we need to save the changes
-            user.save(function (err, user) { });
+            user.save(function (err, user) { 
+                res.json({ success: true });
+            });
         }
     }
 
