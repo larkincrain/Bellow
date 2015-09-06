@@ -20,6 +20,7 @@ var review = require('./review.js');
 var reviewSchema = review.ReviewSchema
 
 var placeSchema = new Schema({
+    placeId: String,                                        //This is the unique identifier that we will give each place so that we can identify it
     types: [{
             place_tpye: String		                        //Bar, restaurant, cafe, supermarket, etc...
         }],						

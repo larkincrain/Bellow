@@ -42,6 +42,7 @@ var CommentModule = require('./schemas/comment.js');                //Our schema
 var ReviewModule = require('./schemas/review.js');                  //Our schema for reviews on establishments of events
 var EventModule = require('./schemas/event.js');                    //Our schema for events that are held at places
 var PlaceModule = require('./schemas/place.js');                    //Our schema for places, physical establishments               
+var GroupModule = require('./schemas/group.js');                    //Our schema for groups, collections of users
 
 //Obejcts and instantiantions of our models
 var User = UserModule.User;                                         //The Mongo data model for a user
@@ -61,6 +62,9 @@ var EventSchema = EventModule.EventSchema;                          //The Mongo 
 
 var Place = PlaceModule.Place;                                      //The Mongo data model for a place
 var PlaceSchema = PlaceModule.PlaceSchema;                          //The Mongo schema for a place
+
+var Group = GroupModule.Group;                                      //The Mongo data model for a group.
+var GroupSchema = GroupModule.GroupSchema;                          //The Mongo schema for a group.
 
 var app = express();
 var port = environment.port || 8080;
@@ -116,6 +120,7 @@ app.get('/messing', function (req, res) {
 //API Routes
 var apiRoutes = express.Router();
 
+//Route to create a new user.
 apiRoutes.post('/signup', function (req, res) {
     
     var password = req.body.password;                       //The password the user submitted
@@ -164,7 +169,7 @@ apiRoutes.post('/signup', function (req, res) {
 
 });
 
-//Route to authenticate a user
+//Route to authenticate a user.
 apiRoutes.post('/authenticate', function (req, res) {
     
     var password = req.body.password;
@@ -259,6 +264,22 @@ apiRoutes.get('/users', function (req, res) {
     });
 });
 
+//Route to return a single user based on the email address of the user
+apiRoutes.get('/user', function (req, res) {
+    
+    var email = req.query.email;
+
+    if (!email) {
+        res.json({ success: false, message: 'No email address provided' });
+    }
+
+    User.findOne({
+        email: email
+    }, function(err, user){
+        res.json(user)
+    });
+});
+
 //Route to edit a profile, the profile information will be passed in the body of the POST, including which profile
 //is going to be edited. In this method, we will pass certain keys that can be used to update the user's profile.
 //The only required parameter is the one to identify the user, which is the email address
@@ -271,6 +292,9 @@ apiRoutes.post('/user/edit', function (req, res) {
 
     function gotUser(err, user){
         console.log('User is: ' + user);
+
+        if (err)
+            throw err;
 
         if (!user) {
             res.json({ success: false, message: 'Email address not found.' });
@@ -333,6 +357,11 @@ apiRoutes.get('/places', function (req, res) {
                 res.json(places);
             }
         });
+    } else {
+        //Return all of the places in the collection
+        Place.find({}, function (err, places) {
+            res.json(places);
+        });
     }
 });
 
@@ -340,19 +369,141 @@ apiRoutes.get('/places', function (req, res) {
 //required, but apart from those elements, the rest are optional.
 //Required:
 //Name, geoLocation, types
+//Note: types should be a comma delimited list of strings
 apiRoutes.post('/places/add', function (req, res) {
-    var place = new Place({
-        name: name,
-        geoLocation: [lat, lon],
-        type: [types]
+
+    var name = req.body.name;
+    var lat = req.body.lat;
+    var lon = req.body.lon;
+    var types = req.body.types.split(',');     //This should be comma delimited list of strings
+
+    //When we save a new place, we need to come up with a way to give a unique identifier. 
+    //OR: and I like this better, is that we just use Mongo's built in identifier.
+    if (name && lat && lon && (types.size > 0)) {
+        var place = new Place({
+            name: name,
+            geoLocation: [lat, lon],
+            type: types
+        });
+    } else {
+        var message = 'Missing: ';
+
+        if (!name)
+            message += 'name, ';
+        if (!lat)
+            message += 'lat, ';
+        if (!lon)
+            message += 'lon, ';
+        if (types.size == 0)
+            message += 'types, ';
+
+        res.json({ success: false, message: message });
+    }
+
+    //Now we need to loop through each of the properties that are passed in and save them to the object
+    _.forEach(req.body, function (n, key) {
+        if (PlaceSchema.path(key)) {
+            //Then we can save the request body parameter to the user's profile
+            place.set(key, n);
+            //user.path[key] = n;
+            console.log('We have this property: ' + key);
+        }
+        else
+            console.log('We dont have this property: ' + key);
     });
 
-    place.save(function (err){
+    place.save(function (err) {
         if (err)
             throw err;
- 
+
         res.json({ success: true });
-    })
+    });
+});
+
+//Route to edit an existing place. Just like the user's edit route, this will accept any number of parameters,
+//compare them to the place schema, and will save any valid properties against the place in the database.
+apiRoutes.post('/places/edit', function (req, res) {
+    //To edit a place, we must pass in the place ID. This is the unique identifier that our system uses to 
+    //identify different places
+
+    var placeId = req.body.placeId;
+
+    //After we get our place from the database, we call this function
+    function gotPlace(err, place) {
+        if (err)
+            throw err;
+
+        if (!place) {
+            res.json({ success: false, message: 'Place Id not found.' });
+        } else {
+            console.log(PlaceSchema);
+
+            _.forEach(req.body, function (n, key) {
+                if (PlaceSchema.path(key)) {
+                    //Then we can save the request body parameter to the user's profile
+                    place.set(key, n);
+                    //user.path[key] = n;
+                    console.log('We have this property: ' + key);
+                }
+                else
+                    console.log('We dont have this property: ' + key);
+            });
+
+            //After updating the user's document with the changes, we need to save the changes
+            place.save(function (err, user) {
+                res.json({ success: true });
+            });
+        }
+    };
+
+    Place.findOne({
+        placeId: placeId
+    }, gotPlace);
+});
+
+//Region: Groups
+
+//Route to get all the groups. A few limited use cases in production, but most of the time we will have the user
+//pass in some selection criteria, such as type, or geoLocation so that we can narrow down the search.
+apiRoutes.get('/groups', function (req, res) {
+    
+    //See if the user passed in any geolocation parameters in the query string
+    var latitude = req.query.lat;
+    var longitude = req.query.lon;
+    var maxDistance = req.query.distance;
+
+    if (latitude && longitude && maxDistance) {
+
+        console.log("Distance: " + maxDistance);
+        console.log("Latitude: " + latitude);
+        console.log("Longitude: " + longitude);
+
+        //Find any place that has a group office near the user
+        Place.find({
+            group_offices: {
+                location: {
+                    $near: [latitude, longitude],
+                    $maxDistance: maxDistance
+                }
+            }
+        }, function (err, places) {
+            if (err) {
+                throw err;
+            } else {
+                res.json(places);
+            }
+        });
+    } else {
+        //return all of the groups in the collection
+        Group.find({}, function (err, groups) {
+            res.json(groups);
+        });
+    }
+})
+
+//Route to create a new group
+apiRoutes.post('/groups/add', function (req, res) {
+    
 });
 
 //Appy the routes to our application with the prefix /api
