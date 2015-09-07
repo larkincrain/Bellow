@@ -26,7 +26,8 @@ var reviewSchema = new Schema({
     review_body: String,				            //The body of the review
     reviewed_date: Date,				            //When the person visited the establishment
     review_date: Date,					            //When the review was posted
-    
+    review_rating: Number,                          //Out of 5, what score did the user assign
+
     positive: Number,					            //The number of positive feedback on the review
     negative: Number,					            //The number of negative feedback on the review
     comments: [{
