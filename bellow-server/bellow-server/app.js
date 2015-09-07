@@ -503,7 +503,88 @@ apiRoutes.get('/groups', function (req, res) {
 
 //Route to create a new group
 apiRoutes.post('/groups/add', function (req, res) {
-    
+
+    var name = req.body.name;
+    var types = req.body.types.split(',');     //This should be comma delimited list of strings
+
+    //When we save a new place, we need to come up with a way to give a unique identifier. 
+    //OR: and I like this better, is that we just use Mongo's built in identifier.
+    if (name && lat && lon && (types.size > 0)) {
+        var place = new Place({
+            name: name,
+            geoLocation: [lat, lon],
+            type: types
+        });
+    } else {
+        var message = 'Missing: ';
+
+        if (!name)
+            message += 'name, ';
+        if (types.size == 0)
+            message += 'types, ';
+
+        res.json({ success: false, message: message });
+    }
+
+    //Now we need to loop through each of the properties that are passed in and save them to the object
+    _.forEach(req.body, function (n, key) {
+        if (PlaceSchema.path(key)) {
+            //Then we can save the request body parameter to the user's profile
+            place.set(key, n);
+            //user.path[key] = n;
+            console.log('We have this property: ' + key);
+        }
+        else
+            console.log('We dont have this property: ' + key);
+    });
+
+    place.save(function (err) {
+        if (err)
+            throw err;
+
+        res.json({ success: true });
+    });
+});
+
+//Route to edit a group
+apiRoutes.post('/groups/edit', function (req, res) {
+
+    //To edit a place, we must pass in the place ID. This is the unique identifier that our system uses to 
+    //identify different places
+
+    var groupId = req.body.groupId;
+
+    //After we get our place from the database, we call this function
+    function gotGroup(err, group) {
+        if (err)
+            throw err;
+
+        if (!group) {
+            res.json({ success: false, message: 'Group Id not found.' });
+        } else {
+            console.log(GroupSchema);
+
+            _.forEach(req.body, function (n, key) {
+                if (GroupSchema.path(key)) {
+                    //Then we can save the request body parameter to the user's profile
+                    group.set(key, n);
+                    //user.path[key] = n;
+                    console.log('We have this property: ' + key);
+                }
+                else
+                    console.log('We dont have this property: ' + key);
+            });
+
+            //After updating the user's document with the changes, we need to save the changes
+            group.save(function (err, user) {
+                res.json({ success: true });
+            });
+        }
+    };
+
+    Group.findOne({
+        groupId: groupId
+    }, gotGroup);
 });
 
 //Appy the routes to our application with the prefix /api

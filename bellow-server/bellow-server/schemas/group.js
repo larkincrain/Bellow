@@ -38,7 +38,8 @@ var groupSchema = new Schema({
             index: '2dsphere'
         },
         name: String,                   //The name of the office
-    }]
+    }],
+    types: [String]                     //What labels are associated with the group
 });
 
 module.exports.Group = mongoose.model('Group', groupSchema);
