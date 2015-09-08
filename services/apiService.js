@@ -43,12 +43,13 @@
                 //Let's attempt to authenticate
                 var method = "post";
                 var path = "/authenticate";
+                var needToken = false;
                 var body = {
                     email: email,
                     password: password
                 };
 
-                methodConnector(method, path, body).then(function (data) {
+                methodConnector(method, needToken, path, body).then(function (data) {
                     return_obj.success = data.success;
                     return_obj.token = data.token;
                     return_obj.message = data.message;
@@ -76,7 +77,7 @@
         //On Failure: it will return an object with the following properties
         //  success: false
         //  message: error-message
-        //On Success: it will return an object with the following properties
+        //On Success: it will return an object with the following properti0es
         //  success: true
         //  message: null
         var signup = function (email, password) {
@@ -91,15 +92,16 @@
 
             if (email && password) {
 
-                //Let's attempt to authenticate
+                //Let's attempt to sign this user up
                 var method = "post";
+                var needToken = false;
                 var path = "/signup";
                 var body = {
                     email: email,
                     password: password
                 };
 
-                methodConnector(method, path, body).then(function (data) {
+                methodConnector(method, needToken, path, body).then(function (data) {
                     return_obj.success = data.success;
                     return_obj.message = data.message;
 
@@ -122,28 +124,34 @@
             return deferred.promise;
         }
 
+        //This method will return a particular user's information given an email address
+        //Then token
+        var getUserInfo = function (email) {
+
+        }
+
         //Intermediate functions to facilitate interaction between the API methods and the HTTP Methods
-        var methodConnector = function(method, path, payload){
+        var methodConnector = function(method, needToken, path, payload){
 
             //Decide which function to use
             switch (method) {
                 case 'get':
-                    return getQuery(path, payload);
+                    return getQuery(path, needToken, payload);
                     break;
                 case 'put':
-                    return putQuery(path, payload);
+                    return putQuery(path, needToken, payload);
                     break;
                 case 'post':
-                    return postQuery(path, payload);
+                    return postQuery(path, needToken, payload);
                     break;
                 case 'delete':
-                    return deleteQuery(path, payload);
+                    return deleteQuery(path, needToken, payload);
                     break;
             }
         }
 
         //HTTP Methods - These are private, we won't expose them to the application
-        var getQuery = function (path, query) {
+        var getQuery = function (path, needToken, query) {
 
             //Execute the query
             return $http({
@@ -156,7 +164,7 @@
                 return response.data;
             });
         }
-        var putQuery = function (path, body) {
+        var putQuery = function (path, needToken, body) {
 
             return $http({
                 url: config.dataPaths.dataUrl + config.dataPaths.updateValueUrl + '?wfId=' + data.wfId + '&wfDataMetaId=' + data.wfDataMetaId + '&value=' + data.value + '&userId=' + data.userId,
@@ -165,10 +173,10 @@
                 //data: data
             });
         }
-        var postQuery = function () {
+        var postQuery = function (path, needToken, body) {
 
         }
-        var deleteQuery = function () {
+        var deleteQuery = function (path, needToken, body) {
 
         }
 
