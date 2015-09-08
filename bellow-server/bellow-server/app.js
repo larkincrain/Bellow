@@ -144,7 +144,10 @@ apiRoutes.post('/signup', function (req, res) {
             else {
                 //if we completed the transaction without an error:
                 console.log('User saved Successfully!');
-                res.json({ success: true });
+                res.json({
+                    success: true,
+                    message: null
+                });
             }
         });   
     };      //Instantiates a new user in the database with the user's email and hashed password
@@ -159,7 +162,10 @@ apiRoutes.post('/signup', function (req, res) {
         else
             if (user) {
                 //then the email address has already been registered, don't continue
-                res.json({ success: false, message: 'Registration failed. Email address already registered.' })
+                res.json({
+                    success: false,
+                    message: 'Registration failed. Email address already registered.'
+                });
             } else {
                 //then the email address hasn't been registered, so we can proceed
                 console.log('about to register the user');
@@ -180,11 +186,14 @@ apiRoutes.post('/authenticate', function (req, res) {
         console.log('In authentication function, after checking, here is the result: ' + result);
         
         if (!result) {
-            res.json({ success: false, message: 'Authentication failed. Wrong password' })
+
+            res.json({
+                success: false,
+                token: null,
+                message: 'Authentication failed. Wrong password'
+            })
         } else {
-            
-            console.log('no errors!');
-            
+          
             //The user is found and the password, so we need to create a jsonwebtoken
             var token = jwt.sign(user_object, 'followyourfolly', {
                 expiresInMinutes: 1440
@@ -194,7 +203,8 @@ apiRoutes.post('/authenticate', function (req, res) {
             
             res.json({
                 success: true,
-                token: token
+                token: token,
+                message: null
             });
         }
     };

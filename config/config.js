@@ -65,8 +65,8 @@ Configuration file for the Bellow App
         }]);
 
     var apiPaths = {
-        apiUrl: "",												    //This needs to be the location of my node server
-        test_apiUrl: "",											//This needs to be the location of my node server test end point
+        apiUrl: "http://52.88.12.200/api",												        //This needs to be the location of my node server
+        test_apiUrl: "http://52.88.12.200/api/test",										//This needs to be the location of my node server test end point
     };
 
     var config = {

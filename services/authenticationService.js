@@ -19,8 +19,11 @@
         function authenticate(username, password) {
 
             var deferred = $q.defer();  //sUsername=string&sPassword=string&sDirectoryList=string&sAppName=string
-            var path = config.apiPaths.authenticateUser + "?callback=JSON_CALLBACK&sUsername=" + username + "&sPassword=" + window.encodeURIComponent(password) + "&sDirectoryList=&sAppName=";
+            var path = config.apiPaths.apiUrl;
+            
+            $http.
 
+            /*
             $http.jsonp(config.servicePaths.authenticationUrl + path)
 				.success(function (data, status, headers, config) {
 				    if (typeof (data) != 'object' && data.indexOf("INVALID USER") > -1) {
@@ -39,10 +42,11 @@
 				}).error(function (data, status, headers, config) {
 				    deferred.resolve('Authentication Failed');
 				});
-
+                */
             return deferred.promise;
 
         }    //authenticate the user against the credentialing authority
+
         function logout() {
             console.log('logout');
             userInfo = null;
