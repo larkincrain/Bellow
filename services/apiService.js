@@ -15,6 +15,8 @@
         var path = config.apiPaths.apiUrl;              //The path to the service sitting on top of the database to access the data
         var test_path = config.apiPaths.test_apiUrl;    //The test path so we are able to direct requests to the local instance of the service
         
+        var token;                                      //The API access token that was returned from the authenticate method
+
         //The API Methods. These will call the HTTP Methods
 
         //This method will attempt to authenticate the user.
@@ -54,6 +56,8 @@
                     return_obj.token = data.token;
                     return_obj.message = data.message;
 
+                    token = data.token;                     //Save our token for future use
+
                     deferred.resolve(return_obj);
                 });
 
@@ -81,6 +85,7 @@
         //  success: true
         //  message: null
         var signup = function (email, password) {
+
             //The object whose promise we will return
             var deferred = q.defer();
 
@@ -125,33 +130,72 @@
         }
 
         //This method will return a particular user's information given an email address
-        //Then token
         var getUserInfo = function (email) {
 
+            //The object whose promise we will return
+            var deferred = q.defer();
+
+            //The object with all the relavent information to return
+            var return_obj = {
+                success: false,
+                message: null,
+                userInfo: null
+            };
+
+            if (email) {
+
+                //Let's attempt to sign this user up
+                var method = "get";
+                var needToken = true;
+                var path = "/user";
+                var query = {
+                    email: email
+                };
+
+                methodConnector(method, needToken, path, body).then(function (data) {
+                    return_obj.success = data.success;
+                    return_obj.message = data.message;
+                    return_obj.userInfo = data.userInfo;
+
+                    deferred.resolve(return_obj);
+                });
+
+            } else {
+                return_obj.success = false;
+                return_obj.message = "Email cannot be left blank.";
+
+                deferred.resolve(return_obj);
+            }
+
+            return deferred.promise;
         }
 
         //Intermediate functions to facilitate interaction between the API methods and the HTTP Methods
         var methodConnector = function(method, needToken, path, payload){
 
+            //Check out the security requirements of the API call
+            if (needToken)
+                payload.token = token;
+
             //Decide which function to use
             switch (method) {
                 case 'get':
-                    return getQuery(path, needToken, payload);
+                    return getQuery(path, payload);
                     break;
                 case 'put':
-                    return putQuery(path, needToken, payload);
+                    return putQuery(path, payload);
                     break;
                 case 'post':
-                    return postQuery(path, needToken, payload);
+                    return postQuery(path, payload);
                     break;
                 case 'delete':
-                    return deleteQuery(path, needToken, payload);
+                    return deleteQuery(path, payload);
                     break;
             }
         }
 
         //HTTP Methods - These are private, we won't expose them to the application
-        var getQuery = function (path, needToken, query) {
+        var getQuery = function (path, query) {
 
             //Execute the query
             return $http({
@@ -164,7 +208,7 @@
                 return response.data;
             });
         }
-        var putQuery = function (path, needToken, body) {
+        var putQuery = function (path, body) {
 
             return $http({
                 url: config.dataPaths.dataUrl + config.dataPaths.updateValueUrl + '?wfId=' + data.wfId + '&wfDataMetaId=' + data.wfDataMetaId + '&value=' + data.value + '&userId=' + data.userId,
@@ -173,10 +217,10 @@
                 //data: data
             });
         }
-        var postQuery = function (path, needToken, body) {
+        var postQuery = function (path, body) {
 
         }
-        var deleteQuery = function (path, needToken, body) {
+        var deleteQuery = function (path, body) {
 
         }
 
