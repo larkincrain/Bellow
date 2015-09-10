@@ -70,7 +70,11 @@
     <script src="config/config.js"></script>                                                                    <!-- Module Configuration-->
 
     <script src="services/transformRequestAsFormPostService.js"></script>                                       <!-- Transform Request Service-->
-    <script src="controllers/loginController.js"></script>                                                     <!-- Controller for the login page-->
+    <script src="services/apiService.js"></script>                                                              <!-- Lowest level service to handle requests to the server-->
+    <script src="services/authenticationService.js"></script>                                                   <!-- Service to handle authentication-->
+
+    <script src="controllers/mainController.js"></script>                                                       <!-- Controller for the main page-->
+    <script src="controllers/loginController.js"></script>                                                      <!-- Controller for the login page-->
 
 </body>
 </html>

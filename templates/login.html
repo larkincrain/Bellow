@@ -1,49 +1,34 @@
 ﻿<div class="login-background">
     <br />
     <br />
+
+    <br />
     <br />
     <br />
     <div class="col-md-6 col-md-offset-3" style="background-color: rgba(255, 255, 255, .75); padding-bottom: 20px">
         <div class="login-header text-center">
             <h1>Bellow</h1>
-            <p>{{ welcomeMessage }}</p>
         </div>
 
         <toaster-container></toaster-container>
 
-        <!-- If the user is not logged in, display this form-->
-        <div ng-show="status == 'loggedOut'" class="container">
-            <form name="loginForm" class="form-horizontal login-wrapper" novalidate ng-submit="submit()">
-                <div class="login-content">
-                    <div class="login-control">
-                        <input id="Username" name="Username" placeholder="Username" class="form-control" required ng-model="username" />
-                    </div>
-                    </br>
-                    <div class="login-control">
-                        <input id="Password" name="Password" placeholder="Password" class="form-control" type="password" required ng-model="password" />
-                    </div>
+        <form name="loginForm" class="form-horizontal login-wrapper" novalidate ng-submit="submit()">
+            <div class="login-content">
+                <div class="login-control">
+                    <input id="Username" name="Username" placeholder="Username" class="form-control" required ng-model="username" />
                 </div>
                 </br>
-                <div class="actions">
-                    <div class="login-control">
-                        <button id="Submit" name="Submit" class="btn form-control" ng-disabled="loginForm.$invalid">Login</button>
-                    </div>
+                <div class="login-control">
+                    <input id="Password" name="Password" placeholder="Password" class="form-control" type="password" required ng-model="password" />
                 </div>
-            </form>
-        </div>
-
-        <!-- If the user is logged in, display their username and a logout button-->
-        <div ng-if="status == 'loggedIn'" class="container">
-            <div>
-                Logged in as: {{firstname}} {{lastname}}
             </div>
-
             </br>
-
-            <div class="login-control">
-                <button ng-click="logout()" class="btn form-control">Log Out</button>
+            <div class="actions">
+                <div class="login-control">
+                    <button id="Submit" name="Submit" class="btn form-control" ng-disabled="loginForm.$invalid">Login</button>
+                </div>
             </div>
+        </form>
 
-        </div>
     </div>
 </div>

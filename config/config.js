@@ -8,6 +8,8 @@ Configuration file for the Bellow App
     //Routing options
     BellowApp.config(['$httpProvider', '$urlRouterProvider', '$stateProvider', function ($httpProvider, $urlRouterProvider, $stateProvider) {
 
+        console.log('start routing config');
+
         $httpProvider.defaults.useXDomain = true;
         delete $httpProvider.defaults.headers.common['X-Requested-With'];
 
@@ -15,6 +17,15 @@ Configuration file for the Bellow App
 
         $stateProvider
 
+        .state('test', {
+            url: "/test",
+            views: {
+                "main-content": {
+                    templateUrl: 'templates/login.html',
+                    controller: 'loginController'
+                }
+            }
+        })
         .state('home', {
             url: "/",
             views: {
@@ -28,7 +39,7 @@ Configuration file for the Bellow App
                 },
                 "main-content": {
                     templateUrl: 'templates/home.html',
-                    controller: 'homeController'
+                    controller: 'loginController'
                 }
             }
         })
@@ -37,7 +48,7 @@ Configuration file for the Bellow App
             views: {
                 "login": {
                     templateUrl: 'templates/authentication.html',
-                    controller: 'authController'
+                    controller: 'loginController'
                 }
             }
         })
@@ -57,7 +68,10 @@ Configuration file for the Bellow App
             });
 
             $rootScope.$on("$stateChangeStart", function (event, next, curent) {
+                console.log('We are changing the state');
+
                 if (authenticationService.isLoggedIn() == false) {
+                    console.log('User is not authenticated, send to login page');
                     $location.path("/login");
                 }
             });
