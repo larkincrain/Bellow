@@ -70,9 +70,10 @@ Configuration file for the Bellow App
             $rootScope.$on("$stateChangeStart", function (event, next, curent) {
                 console.log('We are changing the state');
 
-                if (authenticationService.isLoggedIn() == false) {
+                if (authenticationService.isLoggedIn() == false && $location.path().indexOf('login') < 0) {
                     console.log('User is not authenticated, send to login page');
-                    $location.path("/login");
+                    //$location.path("/login");
+                    $state.go('login');
                 }
             });
 
