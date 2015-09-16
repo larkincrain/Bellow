@@ -10,19 +10,23 @@
 
 //The modules that we need to import
 var mongoose = require('mongoose');							//Accessing our mongo database 
-var express = require('express');							//For our web API 
+var express = require('express');							//For our web API
+var bodyparser = require('body-parser');					//To handle POST requests 
 
 //Let's connect to the databse
 mongoose.connect('mongodb://webclient:Peregrine19!@ds033133.mongolab.com:33133/bellow');
-
 
 var db = mongoose.connection;								//The database object
 var app = express();										//The application object, used to control functionality based on URLs
 
 //This is where all of our setup will go 
 function initializeFunction(){
-	
+	//Configure the bodyparser
+	app.use(bodyparser.urlencoded({extended: false}));	
 }
+
+//Call the initialize function to set everything up.
+initializeFunction();
 
 //Let's attempt to open the database
 db.on('error', function(){
@@ -142,7 +146,11 @@ var establishmentSchema = mongoose.Schema({
 	current_statuses: [{				
 		status: String					//Closed temporarily, under construction, permanently closed, etc
 	}],			
-	
+	website: String,					//The establishment's website
+	APIids: [{
+		APIname: String,				//The name of the API that holds information, such as google places, etc
+		APIplaceid: String,				//The ID of the establishment that the API gave it.
+	}],
 	geoLocation: {
 		location: [Number], 			//Longitude then latitude
 		index: '2dsphere'				//Create a geospatial index
@@ -298,6 +306,7 @@ app.get('/places', function(req, res){
 	}
 });
 
+//Get and return the information associated with the establishment whose name is passed in.
 app.get('/places/:name', function(req, res){
 	
 	//This function should return only the place who's name matches the name that was passed in
@@ -312,13 +321,8 @@ app.get('/places/:name', function(req, res){
 	}); 
 });
 
-app.get('/places/search/:name', function(req, res){
-	
-	//This will return a list of all of the establishments who's full name matches with the user's input
-	establishmentSchema.find({
-		name: { $in: }
-	})
-});
+//Add a new 
+app.post()
 
 //Server setup
 var server = app.listen(3000, function () {
